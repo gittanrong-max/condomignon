@@ -22,6 +22,13 @@ feature is email/password account creation and sign-in using Supabase Auth.
 By default, Supabase may require email confirmation before a new account can
 sign in. The app displays a message asking the user to check their email.
 
+After signing in, a user can create an organization. This flow expects the
+`organizations` and `organization_members` tables, their Row Level Security
+policies, and the `create_organization(text)` RPC to be installed in Supabase.
+Run the organization setup SQL in the Supabase SQL Editor before testing this
+feature. The RPC creates the organization and its owner membership together;
+the app then reads memberships and organizations through the user's session.
+
 Only the Supabase publishable key belongs in frontend configuration. Never put
 the secret or service-role key in this app. Before adding customer data, enable
 and test Row Level Security policies for every database table.

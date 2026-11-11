@@ -263,6 +263,61 @@ h1 {
   font-weight: 600;
 }
 
+.organization-section {
+  margin-top: 26px;
+  text-align: left;
+}
+
+.section-divider {
+  height: 1px;
+  margin-bottom: 25px;
+  background: var(--line);
+}
+
+.organization-heading {
+  margin-bottom: 20px;
+}
+
+.organization-heading h2 {
+  margin: 0;
+  font-family: Manrope, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  line-height: 1.3;
+}
+
+.organization-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfb;
+}
+
+.organization-item h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.organization-item p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.organization-help {
+  font-size: 12px;
+}
+
+.retry-button {
+  margin-top: 0;
+}
+
 .secondary-button {
   width: 100%;
   margin-top: 25px;

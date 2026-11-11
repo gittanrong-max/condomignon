@@ -3,11 +3,63 @@ import type { User } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 type AuthMode = 'sign-in' | 'sign-up'
+type OrganizationAccess = {
+  id: string
+  name: string
+  role: string
+}
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
     : 'Something went wrong. Please try again.'
+}
+
+async function getOrganizationsForUser(
+  client: NonNullable<typeof supabase>,
+  userId: string,
+): Promise<OrganizationAccess[]> {
+  const { data: memberships, error: membershipsError } = await client
+    .from('organization_members')
+    .select('organization_id, role')
+    .eq('user_id', userId)
+
+  if (membershipsError) {
+    throw membershipsError
+  }
+
+  if (memberships.length === 0) {
+    return []
+  }
+
+  const organizationIds = memberships.map(
+    (membership) => membership.organization_id,
+  )
+  const { data: organizations, error: organizationsError } = await client
+    .from('organizations')
+    .select('id, name')
+    .in('id', organizationIds)
+
+  if (organizationsError) {
+    throw organizationsError
+  }
+
+  const organizationsById = new Map(
+    organizations.map((organization) => [organization.id, organization.name]),
+  )
+
+  return memberships.map((membership) => {
+    const name = organizationsById.get(membership.organization_id)
+    if (!name) {
+      throw new Error('A membership was found, but its organization could not be loaded.')
+    }
+
+    return {
+      id: membership.organization_id,
+      name,
+      role: membership.role,
+    }
+  })
 }
 
 export default function App() {
@@ -16,9 +68,13 @@ export default function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [organizationName, setOrganizationName] = useState('')
+  const [organizations, setOrganizations] = useState<OrganizationAccess[]>([])
   const [notice, setNotice] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [organizationError, setOrganizationError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingOrganizations, setIsLoadingOrganizations] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -43,10 +99,98 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!user || !supabase) {
+      setOrganizations([])
+      setOrganizationError('')
+      setIsLoadingOrganizations(false)
+      return
+    }
+
+    let isCurrent = true
+    setIsLoadingOrganizations(true)
+    setOrganizationError('')
+
+    getOrganizationsForUser(supabase, user.id)
+      .then((memberships) => {
+        if (isCurrent) {
+          setOrganizations(memberships)
+        }
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) {
+          setOrganizationError(getErrorMessage(error))
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoadingOrganizations(false)
+        }
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [user])
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode)
     setNotice('')
     setErrorMessage('')
+  }
+
+  async function handleCreateOrganization(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setNotice('')
+    setOrganizationError('')
+
+    if (!supabase || !user) {
+      setOrganizationError('Sign in before creating an organization.')
+      return
+    }
+
+    const cleanName = organizationName.trim()
+    if (cleanName.length < 1 || cleanName.length > 120) {
+      setOrganizationError('Enter an organization name between 1 and 120 characters.')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.rpc('create_organization', {
+        organization_name: cleanName,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      setOrganizationName('')
+      const memberships = await getOrganizationsForUser(supabase, user.id)
+      setOrganizations(memberships)
+      setNotice('Your organization has been created.')
+    } catch (error) {
+      setOrganizationError(getErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleReloadOrganizations() {
+    if (!supabase || !user) {
+      return
+    }
+
+    setOrganizationError('')
+    setIsLoadingOrganizations(true)
+    try {
+      const memberships = await getOrganizationsForUser(supabase, user.id)
+      setOrganizations(memberships)
+    } catch (error) {
+      setOrganizationError(getErrorMessage(error))
+    } finally {
+      setIsLoadingOrganizations(false)
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -145,10 +289,87 @@ export default function App() {
             <p className="eyebrow">YOUR ACCOUNT</p>
             <h1 id="page-title">You’re signed in</h1>
             <p className="account-email">{user.email}</p>
-            <p className="muted">
-              Your account is connected. Your organization’s financial records
-              will be added in a later step.
-            </p>
+            <div className="organization-section">
+              <div className="section-divider" />
+              {isLoadingOrganizations ? (
+                <p className="loading-message" role="status">
+                  Loading your organizations…
+                </p>
+              ) : organizationError ? (
+                <div>
+                  <p className="form-message error-message" role="alert">
+                    Could not load your organizations: {organizationError}
+                  </p>
+                  <button
+                    className="secondary-button retry-button"
+                    type="button"
+                    onClick={handleReloadOrganizations}
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : organizations.length > 0 ? (
+                <div className="organization-list">
+                  <p className="eyebrow">YOUR ORGANIZATIONS</p>
+                  {organizations.map((organization) => (
+                    <article className="organization-item" key={organization.id}>
+                      <div>
+                        <h2>{organization.name}</h2>
+                        <p>{organization.role}</p>
+                      </div>
+                    </article>
+                  ))}
+                  <p className="muted organization-help">
+                    Organization finance features will be added next.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div className="card-heading organization-heading">
+                    <p className="eyebrow">GET STARTED</p>
+                    <h2 id="organization-title">Create your organization</h2>
+                    <p className="muted">
+                      This will create an organization and make your account its owner.
+                    </p>
+                  </div>
+                  <form
+                    className="auth-form"
+                    aria-labelledby="organization-title"
+                    onSubmit={handleCreateOrganization}
+                  >
+                    <label htmlFor="organization-name">Organization name</label>
+                    <input
+                      id="organization-name"
+                      name="organization-name"
+                      type="text"
+                      autoComplete="organization"
+                      maxLength={120}
+                      required
+                      value={organizationName}
+                      onChange={(event) => setOrganizationName(event.target.value)}
+                      placeholder="e.g. Northside Community Group"
+                    />
+                    {organizationError && (
+                      <p className="form-message error-message" role="alert">
+                        {organizationError}
+                      </p>
+                    )}
+                    {notice && (
+                      <p className="form-message success-message" role="status">
+                        {notice}
+                      </p>
+                    )}
+                    <button
+                      className="primary-button"
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Creating organization…' : 'Create organization'}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
             <button
               className="secondary-button"
               type="button"
