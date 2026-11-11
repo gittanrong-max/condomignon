@@ -1,7 +1,0 @@
-streamlit
-fastapi
-uvicorn
-numpy
-pandas
-pydantic
-statsmodels
