@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
+import FinanceWorkspace from './FinanceWorkspace'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 type AuthMode = 'sign-in' | 'sign-up'
@@ -76,6 +77,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingOrganizations, setIsLoadingOrganizations] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const activeUserId = useRef<string | null>(null)
 
   useEffect(() => {
     if (!supabase) {
@@ -88,6 +90,13 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
+        const nextUserId = session?.user.id ?? null
+        if (activeUserId.current !== nextUserId) {
+          activeUserId.current = nextUserId
+          setOrganizations([])
+          setOrganizationError('')
+          setIsLoadingOrganizations(nextUserId !== null)
+        }
         setUser(session?.user ?? null)
         setIsLoading(false)
       }
@@ -309,20 +318,7 @@ export default function App() {
                   </button>
                 </div>
               ) : organizations.length > 0 ? (
-                <div className="organization-list">
-                  <p className="eyebrow">YOUR ORGANIZATIONS</p>
-                  {organizations.map((organization) => (
-                    <article className="organization-item" key={organization.id}>
-                      <div>
-                        <h2>{organization.name}</h2>
-                        <p>{organization.role}</p>
-                      </div>
-                    </article>
-                  ))}
-                  <p className="muted organization-help">
-                    Organization finance features will be added next.
-                  </p>
-                </div>
+                <FinanceWorkspace key={user.id} organizations={organizations} userId={user.id} />
               ) : (
                 <div>
                   <div className="card-heading organization-heading">

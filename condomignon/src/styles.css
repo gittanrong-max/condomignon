@@ -29,7 +29,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -161,6 +162,25 @@ h1 {
   background: #fff;
   color: var(--ink);
   font-size: 14px;
+}
+
+.auth-form select,
+.organization-picker select {
+  width: 100%;
+  min-height: 46px;
+  margin-bottom: 17px;
+  padding: 0 13px;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.auth-form select:focus-visible,
+.organization-picker select:focus-visible {
+  outline: 3px solid #91c8a9;
+  outline-offset: 2px;
 }
 
 .auth-form input::placeholder {
@@ -318,6 +338,298 @@ h1 {
   margin-top: 0;
 }
 
+.finance-workspace {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.organization-picker {
+  margin-bottom: 24px;
+}
+
+.organization-picker label,
+.inline-form label,
+.payment-form label {
+  display: block;
+  margin-bottom: 7px;
+  color: #35433a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.organization-picker select {
+  margin: 0;
+}
+
+.finance-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 23px;
+}
+
+.finance-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.finance-heading h2 {
+  margin: 0;
+  font-family: Manrope, sans-serif;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+
+.role-badge,
+.balance-badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf5ef;
+  color: #35664a;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.finance-panel {
+  margin-top: 17px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.panel-heading .eyebrow {
+  margin-bottom: 4px;
+}
+
+.panel-heading h3 {
+  margin: 0;
+  font-family: Manrope, sans-serif;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.inline-form input,
+.payment-form input {
+  min-width: 0;
+  height: 43px;
+  padding: 0 11px;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.form-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+
+.form-row > input,
+.form-row > .form-field {
+  flex: 1;
+}
+
+.form-field {
+  min-width: 0;
+}
+
+.form-field label {
+  display: block;
+  min-height: 30px;
+  margin-bottom: 5px;
+  color: #35433a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 9px;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.compact-button {
+  width: auto;
+  min-height: 43px;
+  margin: 0;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.list-summary {
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.finance-form {
+  gap: 0;
+}
+
+.finance-form .form-row {
+  margin-bottom: 15px;
+}
+
+.finance-form .primary-button {
+  width: 100%;
+}
+
+.charge-list {
+  display: grid;
+  gap: 11px;
+}
+
+.charge-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfb;
+}
+
+.charge-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.charge-person {
+  margin: 0 0 4px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.charge-card h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.balance-badge {
+  background: #fff4e5;
+  color: #8a5a17;
+}
+
+.balance-badge.paid {
+  background: #edf5ef;
+  color: #35664a;
+}
+
+.charge-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 15px 0 0;
+}
+
+.charge-details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.charge-details dt {
+  color: var(--muted);
+}
+
+.charge-details dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+.payment-history {
+  margin-top: 13px;
+  border-top: 1px solid var(--line);
+  color: #536158;
+  font-size: 12px;
+}
+
+.payment-history summary {
+  padding-top: 11px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.payment-history ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.payment-history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.payment-history strong {
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.text-button {
+  margin-top: 13px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.text-button:hover {
+  color: var(--green-dark);
+  text-decoration: underline;
+}
+
+.payment-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.payment-form .form-row input {
+  width: 50%;
+}
+
+.payment-form .primary-button {
+  width: 100%;
+  min-height: 42px;
+}
+
+.all-paid-note {
+  margin: 14px 0 0;
+  color: #35664a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .secondary-button {
   width: 100%;
   margin-top: 25px;
@@ -343,6 +655,22 @@ footer {
 
   .auth-card {
     padding: 28px 22px;
+  }
+
+  .finance-panel {
+    padding: 14px;
+  }
+
+  .form-row {
+    flex-wrap: wrap;
+  }
+
+  .form-row > .form-field {
+    flex: 1 1 130px;
+  }
+
+  .charge-details {
+    gap: 9px;
   }
 }
 
